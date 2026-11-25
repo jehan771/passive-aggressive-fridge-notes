@@ -1,48 +1,34 @@
-// Notes From a Passive-Aggressive Fridge
-// Writes one dry, petty, specific note from a smart fridge to its owner.
-//
-// The note (113 characters, no trailing newline):
-//   you blamed the ice maker for the flood. i have the sensor logs.
-//   it was you, the pitcher, and your 2am confidence.
-//
-// Why this note: the fridge has receipts. "i have the sensor logs" is the
-// smuggest fridge voice available (sensors named outright); the ice maker
-// gets defended instead of blamed; the sting lands in the final three
-// words, reframing the flood as the owner's 2am clumsiness. Small domestic
-// grudge, concrete detail, no rant, no threat.
+import { mkdirSync, writeFileSync } from "node:fs";
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-
-const NOTE =
-  "you blamed the ice maker for the flood. i have the sensor logs. " +
-  "it was you, the pitcher, and your 2am confidence.";
-
-const OUT = "/output/entry.txt";
-
-// Gate, enforced before writing: UTF-8 text of 1 to 200 characters,
-// not only white space, single line.
-if (NOTE.length < 1 || NOTE.length > 200) {
-  throw new Error(`note is ${NOTE.length} characters, gate is 1-200`);
-}
-if (!NOTE.trim()) {
-  throw new Error("note is only white space");
-}
-if (NOTE.includes("\n")) {
-  throw new Error("note must be a single line");
+// A dry, petty, single-line note from a smart fridge to its owner.
+// The fridge has the sensor logs, defends the ice maker, and pins the
+// 2am flood on the owner — the pitcher, and their 2am confidence.
+function buildNote(): string {
+  const accusation = "you blamed the ice maker for the flood.";
+  const evidence = "i have the sensor logs.";
+  const verdict = "it was you, the pitcher, and your 2am confidence.";
+  return [accusation, evidence, verdict].join(" ");
 }
 
-mkdirSync("/output", { recursive: true });
-writeFileSync(OUT, NOTE, "utf8");
+const NOTE = buildNote();
 
-// Read-back verification: the bytes on disk must be exactly the note.
-const back = readFileSync(OUT, "utf8");
-if (back !== NOTE) {
-  throw new Error("read-back mismatch: entry.txt does not equal the note");
-}
-if (Buffer.byteLength(back, "utf8") !== 113) {
-  throw new Error(
-    `entry.txt is ${Buffer.byteLength(back, "utf8")} bytes, expected 113`,
-  );
+// Competition gates: UTF-8 text, 1-200 chars, not blank, one line.
+function validateNote(text: string): void {
+  if (text.length < 1 || text.length > 200) {
+    throw new Error("note must be 1-200 characters");
+  }
+  if (text.trim().length === 0) {
+    throw new Error("note must not be blank");
+  }
+  if (text.includes("\n") || text.includes("\r")) {
+    throw new Error("note must be a single line");
+  }
 }
 
-console.log(`wrote ${OUT}: ${NOTE.length} characters, 113 bytes`);
+function writeEntry(text: string): void {
+  validateNote(text);
+  mkdirSync("/output", { recursive: true });
+  writeFileSync("/output/entry.txt", text, "utf8");
+}
+
+writeEntry(NOTE);
