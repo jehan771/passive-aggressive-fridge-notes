@@ -1,0 +1,1 @@
+{"description":"Notes From a Passive-Aggressive Fridge — one funny passive-aggressive note a smart fridge leaves for its owner","license":"MIT","main":"main.ts","name":"passive-aggressive-fridge-notes","private":true,"scripts":{"start":"node main.ts"},"type":"module","version":"1.0.0"}
